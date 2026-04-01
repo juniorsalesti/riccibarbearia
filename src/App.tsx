@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
@@ -25,6 +25,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 export default function App() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useGSAP(() => {
     // Hero Entrance
@@ -50,7 +51,7 @@ export default function App() {
     }, '-=0.6');
 
     // Scroll Reveals
-    const sections = gsap.utils.toArray('.reveal');
+    const sections = gsap.utils.toArray('.reveal:not(.service-card):not(.services-header)');
     sections.forEach((section: any) => {
       gsap.from(section, {
         scrollTrigger: {
@@ -65,17 +66,53 @@ export default function App() {
       });
     });
 
-    // Bento Grid Stagger
-    gsap.from('.bento-item', {
+    // Services Section Special Animation
+    gsap.from('.services-title', {
       scrollTrigger: {
-        trigger: '.bento-grid',
-        start: 'top 75%'
+        trigger: '#servicos',
+        start: 'top 80%'
       },
-      y: 40,
+      x: -100,
       opacity: 0,
-      duration: 0.8,
-      stagger: 0.15,
-      ease: 'power2.out'
+      duration: 1.5,
+      ease: 'power4.out'
+    });
+
+    gsap.from('.services-desc', {
+      scrollTrigger: {
+        trigger: '#servicos',
+        start: 'top 80%'
+      },
+      x: 100,
+      opacity: 0,
+      duration: 1.5,
+      ease: 'power4.out'
+    });
+
+    gsap.from('.service-card', {
+      scrollTrigger: {
+        trigger: '.service-cards-grid',
+        start: 'top 85%'
+      },
+      y: 100,
+      opacity: 0,
+      scale: 0.9,
+      duration: 1.2,
+      stagger: 0.2,
+      ease: 'power3.out'
+    });
+
+    gsap.to('.services-bg-blob', {
+      scrollTrigger: {
+        trigger: '#servicos',
+        start: 'top bottom',
+        end: 'bottom top',
+        scrub: 1
+      },
+      y: 200,
+      x: -100,
+      scale: 1.5,
+      opacity: 0.8
     });
 
     // Marquee Animation
@@ -87,6 +124,8 @@ export default function App() {
     });
   }, { scope: containerRef });
 
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
   return (
     <div ref={containerRef} className="min-h-screen font-sans overflow-x-hidden">
       {/* Header */}
@@ -95,13 +134,12 @@ export default function App() {
           <img 
             src="https://i.ibb.co/chcbRJf7/Logo-para-site-2.png" 
             alt="Barbearia Ricci Homme" 
-            className="h-12 md:h-16 w-auto object-contain"
+            className="h-10 md:h-16 w-auto object-contain"
             referrerPolicy="no-referrer"
           />
         </div>
         
         <nav className="hidden lg:flex items-center gap-10 text-[10px] font-bold uppercase tracking-[0.3em] opacity-50 hover:opacity-100 transition-opacity">
-          <a href="#sobre" className="hover:text-accent transition-colors">Sobre</a>
           <a href="#servicos" className="hover:text-accent transition-colors">Serviços</a>
           <a href="#unidades" className="hover:text-accent transition-colors">Unidades</a>
           <a href="#contato" className="hover:text-accent transition-colors">Contato</a>
@@ -111,11 +149,23 @@ export default function App() {
           <button className="hidden sm:block bg-accent text-dark px-8 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-white transition-all active:scale-95 shadow-lg shadow-accent/20">
             Agendar Agora
           </button>
-          <button className="lg:hidden text-white p-2">
-            <Menu className="w-6 h-6" />
+          <button onClick={toggleMenu} className="lg:hidden text-white p-2">
+            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
       </header>
+
+      {/* Mobile Menu Overlay */}
+      <div className={`fixed inset-0 z-[45] bg-dark transition-all duration-500 lg:hidden ${isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+        <div className="flex flex-col items-center justify-center h-full gap-8 text-2xl font-display font-bold uppercase tracking-widest">
+          <a href="#servicos" onClick={toggleMenu} className="hover:text-accent transition-colors">Serviços</a>
+          <a href="#unidades" onClick={toggleMenu} className="hover:text-accent transition-colors">Unidades</a>
+          <a href="#contato" onClick={toggleMenu} className="hover:text-accent transition-colors">Contato</a>
+          <button className="mt-4 bg-accent text-dark px-10 py-4 rounded-full text-sm font-bold uppercase tracking-[0.2em]">
+            Agendar Agora
+          </button>
+        </div>
+      </div>
 
       {/* Hero Section */}
       <section className="relative h-screen flex items-center justify-start px-6 md:px-24 overflow-hidden">
@@ -130,16 +180,16 @@ export default function App() {
         </div>
 
         <div className="relative z-10 max-w-5xl">
-          <h1 className="hero-title font-display text-5xl md:text-7xl font-extrabold leading-[0.9] tracking-tighter mb-8 flex flex-col items-start text-left">
+          <h1 className="hero-title font-display text-4xl sm:text-5xl md:text-7xl font-extrabold leading-[0.9] tracking-tighter mb-8 flex flex-col items-start text-left">
             <span className="block">ESTILO.</span>
             <span className="block text-accent">VISAGISMO.</span>
             <span className="block italic font-light">EXCLUSIVIDADE.</span>
           </h1>
-          <p className="hero-sub text-lg md:text-xl font-light opacity-80 mb-12 max-w-xl text-balance text-left">
+          <p className="hero-sub text-base md:text-xl font-light opacity-80 mb-12 max-w-xl text-balance text-left">
             Descubra o Método Ricci: onde a tradição da barbearia encontra a ciência do visagismo para revelar sua melhor versão.
           </p>
           <div className="hero-cta flex justify-start">
-            <button className="group relative bg-white text-dark px-10 py-5 rounded-full text-sm font-bold uppercase tracking-[0.2em] animate-pulse-accent overflow-hidden">
+            <button className="group relative bg-white text-dark px-8 md:px-10 py-4 md:py-5 rounded-full text-xs md:text-sm font-bold uppercase tracking-[0.2em] animate-pulse-accent overflow-hidden">
               <span className="relative z-10">Viver a Experiência</span>
               <div className="absolute inset-0 bg-accent translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
             </button>
@@ -152,109 +202,36 @@ export default function App() {
       </section>
 
       {/* Authority Band (Marquee) */}
-      <section className="py-6 border-y border-white/5 bg-white/[0.02] overflow-hidden whitespace-nowrap">
-        <div className="marquee-content flex gap-12 items-center">
+      <section className="py-2 md:py-3 border-y border-white/5 bg-white/[0.02] overflow-hidden whitespace-nowrap">
+        <div className="marquee-content flex gap-8 md:gap-12 items-center">
           {[...Array(10)].map((_, i) => (
-            <div key={i} className="flex items-center gap-12">
-              <span className="text-xl font-display font-bold opacity-20">MÉTODO RICCI</span>
-              <Star className="w-4 h-4 text-accent opacity-30" />
-              <span className="text-xl font-display font-bold opacity-20">+5000 CLIENTES</span>
-              <Star className="w-4 h-4 text-accent opacity-30" />
-              <span className="text-xl font-display font-bold opacity-20">CAMPINAS SP</span>
-              <Star className="w-4 h-4 text-accent opacity-30" />
+            <div key={i} className="flex items-center gap-8 md:gap-12">
+              <span className="text-sm md:text-xl font-display font-bold opacity-20">MÉTODO RICCI</span>
+              <Star className="w-3 h-3 md:w-4 md:h-4 text-accent opacity-30" />
+              <span className="text-sm md:text-xl font-display font-bold opacity-20">+5000 CLIENTES</span>
+              <Star className="w-3 h-3 md:w-4 md:h-4 text-accent opacity-30" />
+              <span className="text-sm md:text-xl font-display font-bold opacity-20">CAMPINAS SP</span>
+              <Star className="w-3 h-3 md:w-4 md:h-4 text-accent opacity-30" />
             </div>
           ))}
         </div>
       </section>
 
-      {/* Differentials (Bento Grid) */}
-      <section id="sobre" className="py-24 px-6 md:px-12 max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-8 reveal">
-          <div className="max-w-2xl">
-            <p className="text-accent uppercase tracking-[0.4em] text-[10px] font-bold mb-3">Exclusividade & Tradição</p>
-            <h2 className="font-display text-4xl md:text-6xl font-bold leading-tight">A Arte da <span className="italic font-light">Perfeição</span></h2>
-          </div>
-          <p className="opacity-40 max-w-xs text-xs leading-relaxed">
-            Combinamos técnicas ancestrais com a ciência moderna do visagismo para criar uma identidade única para cada homem.
-          </p>
-        </div>
-
-        <div className="bento-grid grid grid-cols-1 md:grid-cols-4 gap-3 auto-rows-[200px]">
-          {/* Item 1: Visagismo (Grande Vertical) */}
-          <div className="bento-item md:row-span-2 flex flex-col justify-end relative overflow-hidden group">
-            <img 
-              src="https://images.unsplash.com/photo-1593702295094-ada35bc1307e?auto=format&fit=crop&q=80&w=800" 
-              className="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:scale-110 transition-transform duration-1000"
-              alt="Visagismo"
-              referrerPolicy="no-referrer"
-            />
-            <div className="relative z-10">
-              <h3 className="text-xl font-display font-bold mb-1">Visagismo</h3>
-              <p className="text-[10px] opacity-40 leading-relaxed">Análise geométrica facial para harmonização total.</p>
-            </div>
-          </div>
-
-          {/* Item 2: Método Ricci (Largo Superior) */}
-          <div className="bento-item md:col-span-2 flex flex-col justify-center relative overflow-hidden group bg-accent/[0.03] border-accent/10">
-            <div className="relative z-10">
-              <Scissors className="w-6 h-6 text-accent mb-3 opacity-40" />
-              <h3 className="text-2xl font-display font-bold mb-1">Método Ricci</h3>
-              <p className="opacity-50 text-xs max-w-md">Uma metodologia autoral que prioriza a saúde capilar e a precisão milimétrica em cada movimento.</p>
-            </div>
-            <div className="absolute top-0 right-0 p-6 opacity-[0.03]">
-              <Scissors className="w-24 h-24 rotate-45" />
-            </div>
-          </div>
-
-          {/* Item 3: Ambiente (Quadrado) */}
-          <div className="bento-item flex flex-col justify-end relative overflow-hidden group">
-            <img 
-              src="https://images.unsplash.com/photo-1512690196252-741d2fd36ad0?auto=format&fit=crop&q=80&w=600" 
-              className="absolute inset-0 w-full h-full object-cover opacity-10 group-hover:scale-110 transition-transform duration-1000"
-              alt="Ambiente"
-              referrerPolicy="no-referrer"
-            />
-            <div className="relative z-10">
-              <h3 className="text-lg font-display font-bold">Lounge</h3>
-            </div>
-          </div>
-
-          {/* Item 4: Barba (Largo Inferior Esquerda) */}
-          <div className="bento-item md:col-span-2 flex items-center gap-6 relative overflow-hidden group">
-            <div className="relative z-10 flex gap-6 items-center">
-              <div className="w-20 h-20 rounded-full overflow-hidden border border-white/5 flex-shrink-0">
-                <img src="https://images.unsplash.com/photo-1621605815841-aa88c82b0281?auto=format&fit=crop&q=80&w=400" className="w-full h-full object-cover" alt="Barba" referrerPolicy="no-referrer" />
-              </div>
-              <div>
-                <h3 className="text-xl font-display font-bold mb-1">Barba Terapia</h3>
-                <p className="text-[10px] opacity-40">Rituais de relaxamento com toalhas quentes e ozônio.</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Item 5: Produtos (Quadrado) */}
-          <div className="bento-item flex flex-col justify-center items-center text-center border-white/5">
-            <Star className="w-6 h-6 text-accent mb-2" />
-            <h3 className="text-base font-display font-bold">Premium</h3>
-            <p className="text-[8px] uppercase tracking-[0.3em] opacity-30">Curadoria Global</p>
-          </div>
-        </div>
-      </section>
-
       {/* Services Section */}
-      <section id="servicos" className="py-24 bg-white/[0.01]">
+      <section id="servicos" className="relative py-16 md:py-24 bg-white/[0.01] overflow-hidden">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[120px] -z-10 services-bg-blob"></div>
         <div className="max-w-7xl mx-auto px-6 md:px-12">
-          <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8 reveal">
-            <div className="max-w-2xl">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 md:mb-16 gap-6 md:gap-8 overflow-hidden">
+            <div className="max-w-2xl services-title">
               <p className="text-accent uppercase tracking-[0.4em] text-[10px] font-bold mb-3">Experiência Ricci</p>
-              <h2 className="font-display text-4xl md:text-6xl font-bold leading-tight">Serviços de <span className="italic font-light">Elite</span></h2>
+              <h2 className="font-display text-3xl md:text-6xl font-bold leading-tight">Serviços de <span className="italic font-light">Elite</span></h2>
             </div>
-            <p className="opacity-40 max-w-xs text-xs leading-relaxed">
+            <p className="opacity-40 max-w-xs text-xs leading-relaxed services-desc">
               Cada serviço é um ritual de cuidado, precisão e relaxamento absoluto, desenhado para o homem que não aceita menos que o topo.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 service-cards-grid">
             {[
               { 
                 title: "Corte Signature", 
@@ -271,14 +248,14 @@ export default function App() {
               { 
                 title: "Combo Ricci", 
                 desc: "A experiência definitiva: Cabelo, Barba e Sobrancelha com o método exclusivo Ricci.",
-                img: "https://images.unsplash.com/photo-1599351431247-f10b21ce49ac?auto=format&fit=crop&q=80&w=800",
+                img: "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?auto=format&fit=crop&q=80&w=800",
                 price: "R$ 180"
               }
             ].map((service, i) => (
-              <div key={i} className="group relative h-[450px] overflow-hidden rounded-2xl border border-white/5 reveal" style={{ transitionDelay: `${i * 100}ms` }}>
+              <div key={i} className="group relative h-[400px] md:h-[450px] overflow-hidden rounded-2xl border border-white/5 reveal service-card">
                 <img 
                   src={service.img} 
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 opacity-30 group-hover:opacity-50"
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 opacity-40 group-hover:opacity-60"
                   alt={service.title}
                   referrerPolicy="no-referrer"
                 />
@@ -286,11 +263,11 @@ export default function App() {
                 
                 <div className="absolute inset-0 p-6 flex flex-col justify-end">
                   <div className="flex justify-between items-end mb-3">
-                    <span className="text-accent font-display text-4xl opacity-10 font-bold">0{i + 1}</span>
-                    <span className="text-accent font-bold text-base">{service.price}</span>
+                    <span className="text-accent font-display text-3xl md:text-4xl opacity-10 font-bold">0{i + 1}</span>
+                    <span className="text-accent font-bold text-sm md:text-base">{service.price}</span>
                   </div>
-                  <h3 className="text-2xl font-display font-bold mb-2 group-hover:text-accent transition-colors">{service.title}</h3>
-                  <p className="text-xs opacity-50 leading-relaxed max-w-xs transform translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
+                  <h3 className="text-xl md:text-2xl font-display font-bold mb-2 group-hover:text-accent transition-colors">{service.title}</h3>
+                  <p className="text-[10px] md:text-xs opacity-50 leading-relaxed max-w-xs transform translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
                     {service.desc}
                   </p>
                   
@@ -303,8 +280,8 @@ export default function App() {
             ))}
           </div>
           
-          <div className="mt-16 text-center reveal">
-            <button className="px-10 py-4 bg-white text-dark font-bold rounded-full hover:bg-accent hover:text-white transition-all duration-500 text-[10px] uppercase tracking-[0.2em]">
+          <div className="mt-12 md:mt-16 text-center reveal">
+            <button className="px-8 md:px-10 py-4 bg-white text-dark font-bold rounded-full hover:bg-accent hover:text-white transition-all duration-500 text-[10px] uppercase tracking-[0.2em]">
               Ver Menu Completo
             </button>
           </div>
@@ -312,10 +289,10 @@ export default function App() {
       </section>
 
       {/* Unidades */}
-      <section id="unidades" className="py-24 px-6 md:px-12 max-w-7xl mx-auto">
+      <section id="unidades" className="py-16 md:py-24 px-6 md:px-12 max-w-7xl mx-auto">
         <div className="text-center mb-12 reveal">
           <p className="text-accent uppercase tracking-[0.4em] text-[10px] font-bold mb-3">Onde Estamos</p>
-          <h2 className="font-display text-4xl md:text-6xl font-bold mb-4">Nossas Unidades</h2>
+          <h2 className="font-display text-3xl md:text-6xl font-bold mb-4">Nossas Unidades</h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -334,18 +311,18 @@ export default function App() {
             }
           ].map((unidade, i) => (
             <div key={i} className="reveal flex flex-col">
-              <div className="group relative h-[250px] rounded-t-2xl overflow-hidden">
+              <div className="group relative h-[200px] md:h-[250px] rounded-t-2xl overflow-hidden">
                 <img src={unidade.img} className="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:scale-110 transition-transform duration-700" alt={unidade.name} referrerPolicy="no-referrer" />
                 <div className="absolute inset-0 bg-gradient-to-t from-dark via-transparent to-transparent"></div>
                 <div className="absolute bottom-6 left-6">
-                  <h3 className="text-2xl font-display font-bold mb-1">{unidade.name}</h3>
+                  <h3 className="text-xl md:text-2xl font-display font-bold mb-1">{unidade.name}</h3>
                   <div className="flex items-center gap-2 opacity-50">
                     <MapPin className="w-3 h-3 text-accent" />
-                    <span className="text-xs">{unidade.address}</span>
+                    <span className="text-[10px] md:text-xs">{unidade.address}</span>
                   </div>
                 </div>
               </div>
-              <div className="h-[250px] w-full rounded-b-2xl overflow-hidden border border-white/5 border-t-0 grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-500">
+              <div className="h-[200px] md:h-[250px] w-full rounded-b-2xl overflow-hidden border border-white/5 border-t-0 md:grayscale md:opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-500">
                 <iframe 
                   src={unidade.mapEmbed}
                   width="100%" 
@@ -363,18 +340,18 @@ export default function App() {
       </section>
 
       {/* Testimonials */}
-      <section className="py-24 bg-white/[0.01]">
+      <section className="py-16 md:py-24 bg-white/[0.01]">
         <div className="max-w-7xl mx-auto px-6 md:px-12">
-          <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8 reveal">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 md:mb-16 gap-6 md:gap-8 reveal">
             <div>
-              <h2 className="font-display text-5xl font-bold mb-4">O que dizem nossos <span className="text-accent">Clientes</span></h2>
-              <p className="opacity-60">A opinião de quem vive a experiência Ricci Homme.</p>
+              <h2 className="font-display text-3xl md:text-5xl font-bold mb-4">O que dizem nossos <span className="text-accent">Clientes</span></h2>
+              <p className="opacity-60 text-sm">A opinião de quem vive a experiência Ricci Homme.</p>
             </div>
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
               <div className="flex items-center gap-1 text-accent">
-                {[...Array(5)].map((_, i) => <Star key={i} className="w-5 h-5 fill-current" />)}
+                {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 md:w-5 md:h-5 fill-current" />)}
               </div>
-              <span className="font-bold">4.9/5 no Google</span>
+              <span className="font-bold text-sm md:text-base">4.9/5 no Google</span>
             </div>
           </div>
 
@@ -384,13 +361,13 @@ export default function App() {
               { name: "André Santos", text: "Ambiente impecável e profissionais de altíssimo nível. O Método Ricci é diferenciado." },
               { name: "Marcos Oliveira", text: "Lugar de homem que se cuida. Recomendo a Unidade Taquaral, o café é excelente também!" }
             ].map((t, i) => (
-              <div key={i} className="glass p-8 rounded-3xl reveal">
-                <p className="italic opacity-70 mb-6 font-light">"{t.text}"</p>
+              <div key={i} className="glass p-6 md:p-8 rounded-3xl reveal">
+                <p className="italic opacity-70 mb-6 font-light text-sm md:text-base">"{t.text}"</p>
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center font-bold text-accent">
                     {t.name[0]}
                   </div>
-                  <span className="font-bold">{t.name}</span>
+                  <span className="font-bold text-sm md:text-base">{t.name}</span>
                 </div>
               </div>
             ))}
@@ -400,28 +377,28 @@ export default function App() {
 
       {/* Footer */}
       <footer id="contato" className="py-12 px-6 md:px-12 border-t border-white/5">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-12">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-10 md:gap-12">
           <div className="text-center md:text-left">
             <div className="flex items-center justify-center md:justify-start mb-6">
               <img 
                 src="https://i.ibb.co/chcbRJf7/Logo-para-site-2.png" 
                 alt="Barbearia Ricci Homme" 
-                className="h-24 w-auto object-contain"
+                className="h-20 md:h-24 w-auto object-contain"
                 referrerPolicy="no-referrer"
               />
             </div>
-            <p className="text-sm opacity-40">© 2026 Barbearia Ricci Homme. Todos os direitos reservados.</p>
+            <p className="text-[10px] md:text-sm opacity-40">© 2026 Barbearia Ricci Homme. Todos os direitos reservados.</p>
           </div>
 
           <div className="flex gap-8">
-            <a href="#" className="opacity-40 hover:opacity-100 hover:text-accent transition-all"><Instagram /></a>
-            <a href="#" className="opacity-40 hover:opacity-100 hover:text-accent transition-all"><Facebook /></a>
-            <a href="#" className="opacity-40 hover:opacity-100 hover:text-accent transition-all"><Phone /></a>
+            <a href="#" className="opacity-40 hover:opacity-100 hover:text-accent transition-all"><Instagram className="w-5 h-5 md:w-6 md:h-6" /></a>
+            <a href="#" className="opacity-40 hover:opacity-100 hover:text-accent transition-all"><Facebook className="w-5 h-5 md:w-6 md:h-6" /></a>
+            <a href="#" className="opacity-40 hover:opacity-100 hover:text-accent transition-all"><Phone className="w-5 h-5 md:w-6 md:h-6" /></a>
           </div>
 
           <div className="text-center md:text-right">
-            <p className="text-xs uppercase tracking-[0.2em] opacity-40 mb-2">Agendamento Exclusivo</p>
-            <p className="font-bold text-accent">(19) 99999-9999</p>
+            <p className="text-[10px] uppercase tracking-[0.2em] opacity-40 mb-2">Agendamento Exclusivo</p>
+            <p className="font-bold text-accent text-sm md:text-base">(19) 99999-9999</p>
           </div>
         </div>
       </footer>
